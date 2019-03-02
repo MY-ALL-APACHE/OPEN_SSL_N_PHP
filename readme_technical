@@ -1,0 +1,219 @@
+Implementation of SSl       https://        protocol 
+
+    Apache SSl :
+    Php Open SSl protocol
+    Acme
+
+in https the communication protocol is encrypted using TLS or SSL [old]
+
+SSL/TLS to protect the traffic.
+SSL/TLS is especially suited for HTTP, since it can provide some protection even if only one side of the communication is authenticated.
+This is the case with [[ HTTP transactions over the Internet ]], where typically --only the server-- is authenticated (by the client examining the server's certificate).
+
+In HTTPS Entirety of the underlying HTTP protocol can be encrypted.
+This includes
+    -the request URL (which particular web page was requested),
+    -query parameters,
+    -headers, and 
+    -cookies (which often contain identity information about the user).
+
+However, because host (website) addresses and port numbers are necessarily part of the underlying TCP/IP protocols, HTTPS cannot protect their disclosure.
+In practice this means that even on a correctly configured web server, eavesdroppers can infer the IP address and port number of the web server.
+
+Web browsers know how to trust HTTPS websites based on certificate authorities that come pre-installed in their software.
+Certificate authorities (such as Let's Encrypt, Digicert, Comodo, GoDaddy and GlobalSign) are in this way being trusted by web browser creators to provide valid certificates.
+Therefore, a user should trust an HTTPS connection to a website if and only if all of the following are true:
+    The user trusts that the browser software correctly implements HTTPS with correctly pre-installed certificate authorities.
+    The user trusts the certificate authority to vouch only for legitimate websites.
+    The website provides a valid certificate, which means it was signed by a trusted authority.
+    The certificate correctly identifies the website (e.g., when the browser visits "https://example.com",
+        the received certificate is properly for "example.com" and not some other entity).
+    The user trusts that the protocol's encryption layer (SSL/TLS) is sufficiently secure against eavesdroppers.
+
+
+
+
+Deploying HTTPS also allows the use of HTTP/2 (or its predecessor, the now-deprecated protocol SPDY), that are new generations of HTTP, designed to reduce page load times, size and latency.
+It is recommended to use HTTP Strict Transport Security (HSTS) with HTTPS to protect users from man-in-the-middle attacks, especially SSL stripping.[12][13]
+HTTPS should not be confused with the little-used Secure HTTP (S-HTTP) specified in RFC 2660
+
+HTTPS URLs begin with "https://" and use port 443 by default, whereas HTTP URLs begin with "http://" and use port 80 by default.
+
+
+
+HTTP operates at the highest layer of the TCP/IP model, the Application layer; as does the TLS security protocol (operating as a lower sublayer of the same layer),
+which encrypts an HTTP message prior to transmission and decrypts a message upon arrival. Strictly speaking,
+HTTPS is not a separate protocol, but refers to use of ordinary HTTP over an encrypted SSL/TLS connection.
+
+
+HTTPS encrypts all message contents, including the HTTP headers and the request/response data.
+With the exception of the possible CCA cryptographic attack described in the limitations section below,
+an attacker should only be able to discover that a connection is taking place between the two parties and their domain names and IP addresses.
+
+
+
+Server setup :
+To prepare a web server to accept HTTPS connections, the administrator must create a public key certificate for the web server.
+This certificate must be signed by a trusted certificate authority for the web browser to accept it without warning.
+The authority certifies that the certificate holder is the operator of the web server that presents it.
+Web browsers are generally distributed with a list of signing certificates of major certificate authorities so that they can verify certificates signed by them.
+
+
+
+
+
+SSL and TLS encryption can be configured in two modes:
+    simple and
+    mutual.
+
+    In simple mode, authentication is only performed by the server.
+    The mutual version requires the user to install a personal client certificate in the web browser for user authentication.
+    
+SSL/TLS does not prevent the indexing of the site by a web crawler, and in some cases the URI of the encrypted resource can be inferred by knowing only the intercepted request/response size.
+This allows an attacker to have access to the plaintext (the publicly available static content),
+and the encrypted text (the encrypted version of the static content), permitting a cryptographic attack.
+
+Because TLS operates at a protocol level below that of HTTP, and has no knowledge of the higher-level protocols, TLS servers can only strictly present one certificate for a particular address and port combination.
+In the past, this meant that it was not feasible to use name-based virtual hosting with HTTPS.
+A solution called Server Name Indication (SNI) exists, which sends the hostname to the server before encrypting the connection,although many old browsers do not support this extension.
+Support for SNI is available since Firefox 2, Opera 8, Safari 2.1, Google Chrome 6, and Internet Explorer 7 on Windows Vista.
+
+From an architectural point of view:
+An SSL/TLS connection is managed by the first front machine that initiates the TLS connection.
+If, for any reasons (routing, traffic optimization, etc.), this front machine is not the application server and it has to decipher data, solutions have to be found to propagate user authentication information or certificate to the application server, which needs to know who is going to be connected.
+
+For SSL/TLS with mutual authentication,
+the SSL/TLS session is managed by the first server that initiates the connection.
+In situations where encryption has to be propagated along chained servers, session timeOut management becomes extremely tricky to implement.
+
+With mutual SSL/TLS, security is maximal, but on the client-side, there is no way to properly end the SSL/TLS connection and disconnect the user except by waiting for the server session to expire or closing all related client applications.
+A sophisticated type of man-in-the-middle attack called SSL stripping was presented at the Blackhat Conference 2009.
+This type of attack defeats the security provided by HTTPS by changing the https: link into an http: link, taking advantage of the fact that few Internet users actually type "https" into their browser interface: they get to a secure site by clicking on a link, and thus are fooled into thinking that they are using HTTPS when in fact they are using HTTP.
+The attacker then communicates in clear with the client.
+This prompted the development of a countermeasure in HTTP called {{ HTTP Strict Transport Security }}.
+
+
+Understanding SSL requires an understanding of
+    - cryptographic algorithms,
+    - message digest functions (aka. one-way or hash functions),
+    - and digital signatures.
+
+privacy, integrity, and authentication.
+
+
+__________________
+Cryptography ::
+Conventional cryptography :
+also known as symmetric cryptography, requires the sender and receiver to share a key: a secret piece of information that may be used to encrypt or decrypt a message.
+As long as this key is kept secret, nobody other than the sender or recipient can read the message.
+
+Public key cryptography :
+also known as asymmetric cryptography, solves the key exchange problem by defining an algorithm which uses two keys, each of which may be used to encrypt a message.
+If one key is used to encrypt a message then the other must be used to decrypt it.
+This makes it possible to receive secure messages by simply publishing one key (the public key) and keeping the other secret (the private key).
+Anyone can encrypt a message using the public key, but only the owner of the private key will be able to read it.
+In this way, Alice can send private messages to the owner of a key-pair (the bank), by encrypting them using their public key.
+Only the bank will be able to decrypt them.
+
+_______________________
+Message Digests ::
+Although Alice may encrypt her message to make it private, there is still a concern that someone might modify her original message or substitute it with a different one,
+To guarantee the integrity of the message - there is a possible way of sending the message summary, If the summaries are the same then the message has been received intact.
+
+MESSAGE DIGEST :: A summary such as this is called a message digest, one-way function or hash function.
+
+Message digests are used to create a short, fixed-length representation of a longer, variable-length message.
+Digest algorithms are designed to produce a unique digest for each message.
+
+Message digests are designed to make it impractically difficult to determine the message from the digest and (in theory) impossible to find two different messages which create the same digest
+ -- 
+thus eliminating the possibility of substituting one message for another while maintaining the same digest.
+
+Another challenge that Alice faces is finding a way to send the digest to the bank securely; if the digest is not sent securely,
+its integrity may be compromised and with it the possibility for the bank to determine the integrity of the original message.
+Only if the digest is sent securely can the integrity of the associated message be determined.
+
+[ One way to send the digest securely is to include it in a digital signature ].
+
+
+
+_______________________________
+Digital Signatures ::
+When Alice sends a message to the bank, the bank needs to ensure that the message is really from her,so an intruder cannot request a transaction involving her account.
+A [digital signature], created by Alice and included with the message, serves this purpose.
+
+Digital signatures are created by encrypting a digest of the message and other information (such as a sequence number) with the sender's private key.
+Though anyone can decrypt the signature using the public key, only the sender knows the private key.
+This means that only the sender can have signed the message.
+
+Including the digest in the signature means the signature is only good for that message;
+it also ensures the integrity of the message since [[ no one can change the digest ]] and still sign it.
+
+To guard against interception and reuse of the signature by an intruder at a later date, the signature contains a unique sequence number.
+This protects the bank from a fraudulent claim from Alice that she did not send the message -- only she could have signed it (non-repudiation).
+
+
+__________________________________
+Certificates ::
+Although Alice could have sent a private message to the bank, signed it and ensured the integrity of the message, she still needs to be sure that she is really communicating with the bank.
+This means that :
+    Alice needs to be sure that the public key she is using is part of the bank's key-pair, and not an intruder's Similarly,
+    the bank needs to verify that the message signature really was signed by the private key that belongs to Alice.
+
+If each [ party has a certificate ] which validates
+        --the other's identity,
+        --confirms the public key
+        --and is signed by a trusted agency,
+then both can be assured that they are communicating with whom they intended to.
+Such a trusted agency is called a Certificate Authority and certificates are used for authentication.
+
+Certificate Contents
+A certificate associates a public key with the real identity of an individual, server, or other entity, known as the subject.
+As shown in Table 1, information about the subject includes identifying information (the distinguished name) and the public key.
+It also includes the identification and signature of the Certificate Authority that issued the certificate and the period of time during which the certificate is valid.
+It may have additional information (or extensions) as well as administrative information for the Certificate Authority's use, such as a serial number.
+
+Table 1: Certificate Information
+Subject	Distinguished Name, Public Key
+Issuer	Distinguished Name, Signature
+Period of Validity	Not Before Date, Not After Date
+Administrative Information	Version, Serial Number
+Extended Information	Basic Constraints, Netscape Flags, etc.
+A distinguished name is used to provide an identity in a specific context -- for instance, an individual might have a personal certificate as well as one for their identity as an employee.
+        Distinguished names are defined by the X.509 standard [X509], which defines the fields, field names and abbreviations used to refer to the fields.
+
+Table 2: Distinguished Name Information
+DN Field                Abbrev.             Description                                                             Example
+Common Name	            CN	                Name being certified	                                                CN=Joe Average
+Organization or Company	O	                Name is associated with this
+organization	        O=Snake Oil, Ltd.
+Organizational Unit	    OU	                Name is associated with this organization unit, such as a department	OU=Research Institute
+City/Locality	        L	                Name is located in this City	                                        L=Snake City
+State/Province	        ST	                Name is located in this State/Province	                                ST=Desert
+Country	                C	                Name is located in this Country (ISO code)	                            C=XZ
+
+A Certificate Authority may define a policy specifying which distinguished field names are optional and which are required.
+It may also place requirements upon the field contents, as may users of certificates.
+For example, a Netscape browser requires that the Common Name for a certificate representing a server matches a wildcard pattern for the domain name of that server, such as *.snakeoil.com.
+
+The binary format of a certificate is defined using the ASN.1 notation [ASN1] [PKCS].
+This notation defines how to specify the contents and encoding rules define how this information is translated into binary form.
+The binary encoding of the certificate is defined using [ Distinguished Encoding Rules ] (DER), which are based on the more general [Basic Encoding Rules] (BER).
+For those transmissions which cannot handle binary, the binary form may be translated into an ASCII form by using Base64 encoding [MIME].
+When placed between begin and end delimiter lines (as below), this encoded version is called a PEM ("Privacy Enhanced Mail") encoded certificate.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
